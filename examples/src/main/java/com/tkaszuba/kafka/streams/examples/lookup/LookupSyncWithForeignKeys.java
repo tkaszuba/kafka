@@ -85,7 +85,7 @@ public final class LookupSyncWithForeignKeys {
             deletesState,
             currentStateKeyValue -> currentStateKeyValue.value,
             (currentStateKeyValue, deletesStateKeyValue) -> {
-              if (deletesStateKeyValue == currentStateKeyValue) {
+              if (deletesStateKeyValue.equals(currentStateKeyValue)) {
                 logger.warn(
                     "Duplicate update '{}' encountered in derived lookup topic. Ignoring.",
                     currentStateKeyValue);

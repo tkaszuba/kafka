@@ -27,11 +27,8 @@ import org.apache.kafka.streams.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LookupSyncWithForeignKeysTest {
-  private static final Logger logger = LoggerFactory.getLogger(LookupSyncWithForeignKeysTest.class);
 
   private TopologyTestDriver testDriver;
   private TestInputTopic<String, String> inputTopic;
@@ -97,5 +94,30 @@ public class LookupSyncWithForeignKeysTest {
     var delete = outputTopic.readRecord();
     assertEquals(value1, delete.key());
     assertNull(delete.value());
+  }
+
+  @Test
+  public void testDerivationDeleteOnUpdate() {
+    inputTopic.pipeInput(key, value1);
+    outputTopic.readRecord();
+
+    inputTopic.pipeInput(key, value2);
+    outputTopic.readRecord();
+
+    var delete = outputTopic.readRecord();
+    assertEquals(value1, delete.key());
+    assertNull(delete.value());
+  }
+
+  @Test
+  public void testDuplicationIgnore() {
+
+    inputTopic.pipeInput(key, value1);
+    outputTopic.readRecord();
+    inputTopic.pipeInput(key, value1);
+    assertEquals(1, outputTopic.getQueueSize());
+    var duplicate = outputTopic.readRecord();
+    assertEquals(value1, duplicate.key());
+    assertEquals(key, duplicate.value());
   }
 }
