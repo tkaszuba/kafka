@@ -1,4 +1,4 @@
-package serdes;
+package com.tkaszuba.kafka.serdes;
 
 import java.util.Map;
 import org.apache.kafka.common.serialization.Deserializer;

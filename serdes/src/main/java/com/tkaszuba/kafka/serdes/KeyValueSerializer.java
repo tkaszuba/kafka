@@ -1,4 +1,4 @@
-package serdes;
+package com.tkaszuba.kafka.serdes;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;

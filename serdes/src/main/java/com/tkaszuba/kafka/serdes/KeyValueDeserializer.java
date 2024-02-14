@@ -1,4 +1,4 @@
-package serdes;
+package com.tkaszuba.kafka.serdes;
 
 import java.io.*;
 import java.util.Arrays;

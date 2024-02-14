@@ -1,4 +1,4 @@
-package serdes;
+package com.tkaszuba.kafka.serdes;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,7 +14,7 @@ class SerdeTests {
 
   @Test
   void testKeyValueSerde() {
-    KeyValue<Long, String> keyValue = new KeyValue<>(1L, "test");
+    KeyValue<Long, String> keyValue = KeyValue.pair(1L, "test");
 
     KeyValueSerde<Long, String> serde = new KeyValueSerde<>(Serdes.Long(), Serdes.String());
 
