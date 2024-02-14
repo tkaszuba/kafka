@@ -1,5 +1,8 @@
 # Compiled class file
 *.class
+*.DS_store
+.gradle
+.idea
 
 # Log file
 *.log
