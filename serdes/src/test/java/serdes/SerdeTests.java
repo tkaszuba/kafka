@@ -1,4 +1,4 @@
-package com.tkaszuba.kafka.serdes;
+package serdes;
 
 import static org.junit.jupiter.api.Assertions.*;
 

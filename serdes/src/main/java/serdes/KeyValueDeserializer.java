@@ -1,13 +1,12 @@
-package com.tkaszuba.kafka.serdes;
-
-import org.apache.kafka.common.serialization.Deserializer;
-import org.apache.kafka.common.serialization.Serde;
-import org.apache.kafka.streams.KeyValue;
-import org.apache.kafka.common.errors.SerializationException;
+package serdes;
 
 import java.io.*;
 import java.util.Arrays;
 import java.util.Map;
+import org.apache.kafka.common.errors.SerializationException;
+import org.apache.kafka.common.serialization.Deserializer;
+import org.apache.kafka.common.serialization.Serde;
+import org.apache.kafka.streams.KeyValue;
 
 public class KeyValueDeserializer<K, V> implements Deserializer<KeyValue<K, V>> {
 
