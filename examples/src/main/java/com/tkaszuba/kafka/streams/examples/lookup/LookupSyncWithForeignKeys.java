@@ -60,7 +60,7 @@ public final class LookupSyncWithForeignKeys {
     master
         .filter((k, v) -> v != null)
         .map((k, v) -> new KeyValue<>(v, k))
-        .peek((k, v) -> logger.debug("Forwarding to derived lookup topic ({}, {}})", k, v))
+        .peek((k, v) -> logger.debug("Forwarding to derived lookup topic ({}, {})", k, v))
         .to(DerivedData, Produced.with(stringSerde, stringSerde));
 
     KTable<String, KeyValue<String, String>> deletesState =
@@ -111,8 +111,7 @@ public final class LookupSyncWithForeignKeys {
         .filter((k, v) -> v != null)
         .mapValues(v -> (v.value).equals(TombstoneMarker) ? null : v.value)
         .peek(
-            (k, v) ->
-                logger.debug("Forwarding to derived lookup topic a tombstone ({}, {}})", k, v))
+            (k, v) -> logger.debug("Forwarding to derived lookup topic a tombstone ({}, {})", k, v))
         .to(DerivedData);
   }
 }
