@@ -18,6 +18,7 @@ package com.tkaszuba.kafka.serdes;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.tkaszuba.kafka.streams.ComparableKeyValue;
 import java.util.*;
 import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.Serdes;
@@ -40,6 +41,30 @@ class SerdeTests {
     assertThrows(
         SerializationException.class,
         () -> serde.serializer().serialize(TOPIC, new KeyValue<>(null, "test")));
+
+    assertEquals(
+        keyValue,
+        serde.deserializer().deserialize(TOPIC, serde.serializer().serialize(TOPIC, keyValue)));
+
+    // Tombstones
+    assertNull(serde.deserializer().deserialize(TOPIC, serde.serializer().serialize(TOPIC, null)));
+
+    serde.close();
+  }
+
+  @Test
+  void testComparableKeyValueSerde() {
+    ComparableKeyValue<Long, String> keyValue = new ComparableKeyValue<>(1L, "test");
+
+    ComparableKeyValueSerde<Long, String> serde =
+        new ComparableKeyValueSerde<>(new KeyValueSerde<>(Serdes.Long(), Serdes.String()));
+
+    assertDoesNotThrow(() -> serde.serializer().configure(Collections.emptyMap(), false));
+    assertDoesNotThrow(() -> serde.deserializer().configure(Collections.emptyMap(), false));
+
+    assertThrows(
+        SerializationException.class,
+        () -> serde.serializer().serialize(TOPIC, new ComparableKeyValue<>(null, "test")));
 
     assertEquals(
         keyValue,

@@ -16,60 +16,38 @@
  */
 package com.tkaszuba.kafka.serdes;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import com.tkaszuba.kafka.streams.ComparableKeyValue;
 import java.util.Map;
-import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.streams.KeyValue;
 
-public class KeyValueSerializer<K, V> implements Serializer<KeyValue<K, V>> {
+public class ComparableKeyValueSerializer<K extends Comparable<?>, V extends Comparable<?>>
+    implements Serializer<ComparableKeyValue<K, V>> {
 
-  private final Serializer<K> keySerializer;
-  private final Serializer<V> valueSerializer;
+  private final Serializer<KeyValue<K, V>> serializer;
 
-  public KeyValueSerializer(Serde<K> keySerde, Serde<V> valueSerde) {
-    this(keySerde.serializer(), valueSerde.serializer());
+  public ComparableKeyValueSerializer(Serde<KeyValue<K, V>> serde) {
+    this(serde.serializer());
   }
 
-  public KeyValueSerializer(Serializer<K> keySerializer, Serializer<V> valueSerializer) {
-    this.keySerializer = keySerializer;
-    this.valueSerializer = valueSerializer;
+  public ComparableKeyValueSerializer(Serializer<KeyValue<K, V>> serializer) {
+    this.serializer = serializer;
   }
 
   @Override
   public void configure(Map<String, ?> configs, boolean isKey) {
-    // do nothing
+    serializer.configure(configs, isKey);
   }
 
   @Override
-  public byte[] serialize(String topic, KeyValue<K, V> data) {
-    if (data == null) return null;
-
-    byte[] key = keySerializer.serialize(topic, data.key);
-    byte[] value = valueSerializer.serialize(topic, data.value);
-
-    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    final DataOutputStream dos = new DataOutputStream(baos);
-
-    try {
-      dos.writeInt(key.length);
-      dos.writeInt(value.length);
-    } catch (NullPointerException e) {
-      throw new SerializationException(
-          "The serializer doesn't support null values; the stored key/values must not be null", e);
-    } catch (IOException e) {
-      throw new SerializationException("Unable to serialize KeyValue", e);
-    }
-
-    return combine(baos.toByteArray(), key, value);
+  public byte[] serialize(String topic, ComparableKeyValue<K, V> data) {
+    return serializer.serialize(topic, data);
   }
 
   @Override
   public void close() {
-    // do nothing
+    serializer.close();
   }
 
   public static byte[] combine(byte[] a, byte[] b, byte[] c) {

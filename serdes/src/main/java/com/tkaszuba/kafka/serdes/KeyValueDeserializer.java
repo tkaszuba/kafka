@@ -26,16 +26,16 @@ import org.apache.kafka.streams.KeyValue;
 
 public class KeyValueDeserializer<K, V> implements Deserializer<KeyValue<K, V>> {
 
-  private final Deserializer<K> keySerde;
-  private final Deserializer<V> valueSerde;
+  private final Deserializer<K> keyDeserializer;
+  private final Deserializer<V> valueDeserializer;
 
   public KeyValueDeserializer(Serde<K> keySerde, Serde<V> valueSerde) {
     this(keySerde.deserializer(), valueSerde.deserializer());
   }
 
-  public KeyValueDeserializer(Deserializer<K> keySerde, Deserializer<V> valueSerde) {
-    this.keySerde = keySerde;
-    this.valueSerde = valueSerde;
+  public KeyValueDeserializer(Deserializer<K> keyDeserializer, Deserializer<V> valueDeserializer) {
+    this.keyDeserializer = keyDeserializer;
+    this.valueDeserializer = valueDeserializer;
   }
 
   @Override
@@ -58,7 +58,8 @@ public class KeyValueDeserializer<K, V> implements Deserializer<KeyValue<K, V>> 
       byte[] key = Arrays.copyOfRange(bytes, start, start + keySize);
       byte[] value = Arrays.copyOfRange(bytes, start + keySize, start + keySize + valueSize);
 
-      return new KeyValue<>(keySerde.deserialize(topic, key), valueSerde.deserialize(topic, value));
+      return new KeyValue<>(
+          keyDeserializer.deserialize(topic, key), valueDeserializer.deserialize(topic, value));
 
     } catch (IOException e) {
       throw new SerializationException("Unable to deserialize into KeyValue", e);
