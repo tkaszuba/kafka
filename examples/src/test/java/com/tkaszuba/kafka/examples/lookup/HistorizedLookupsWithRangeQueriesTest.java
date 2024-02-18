@@ -133,33 +133,60 @@ public class HistorizedLookupsWithRangeQueriesTest {
   @Test
   public void testExactMatch() {
     pipeToLookupOutOfOrder();
-    queryCommandTopic.pipeInput(commandId, key2V4);
+    queryCommandTopic.pipeInput(commandId, key1V2);
     var res = queryResponseTopic.readRecord();
     assertEquals(commandId, res.key());
-    assertEquals("key2V4", res.value());
+    assertEquals("key1V2", res.value());
 
-    queryCommandTopic.pipeInput(commandId, key1V1);
+    queryCommandTopic.pipeInput(commandId, key2V3);
     var res2 = queryResponseTopic.readRecord();
     assertEquals(commandId, res2.key());
-    assertEquals("key1V1", res2.value());
+    assertEquals("key2V3", res2.value());
   }
 
   @Test
-  public void testBeforeRangeMatch() {
+  public void testBetweenMatch() {
     pipeToLookupOutOfOrder();
+
     queryCommandTopic.pipeInput(commandId, create(key1, LocalDate.of(2021, 2, 27)));
     var res = queryResponseTopic.readRecord();
     assertEquals(commandId, res.key());
     assertEquals("key1V2", res.value());
+
+    queryCommandTopic.pipeInput(commandId, create(key2, LocalDate.of(2022, 3, 27)));
+    var res2 = queryResponseTopic.readRecord();
+    assertEquals(commandId, res2.key());
+    assertEquals("key2V3", res2.value());
   }
 
   @Test
-  public void testAfterRangeMatch() {
+  public void testEarliestMatch() {
     pipeToLookupOutOfOrder();
-    queryCommandTopic.pipeInput(commandId, create(key2, LocalDate.of(2020, 2, 27)));
+
+    queryCommandTopic.pipeInput(commandId, create(key1, LocalDate.of(2020, 2, 27)));
     var res = queryResponseTopic.readRecord();
     assertEquals(commandId, res.key());
-    assertEquals("key2V1", res.value());
+    assertEquals("key1V1", res.value());
+
+    queryCommandTopic.pipeInput(commandId, create(key2, LocalDate.of(2021, 3, 27)));
+    var res2 = queryResponseTopic.readRecord();
+    assertEquals(commandId, res2.key());
+    assertEquals("key2V1", res2.value());
+  }
+
+  @Test
+  public void testLatestMatch() {
+    pipeToLookupOutOfOrder();
+
+    queryCommandTopic.pipeInput(commandId, create(key1, LocalDate.of(2022, 2, 27)));
+    var res = queryResponseTopic.readRecord();
+    assertEquals(commandId, res.key());
+    assertEquals("key1V4", res.value());
+
+    queryCommandTopic.pipeInput(commandId, create(key2, LocalDate.of(2023, 3, 27)));
+    var res2 = queryResponseTopic.readRecord();
+    assertEquals(commandId, res2.key());
+    assertEquals("key2V4", res2.value());
   }
 
   @Test
@@ -180,7 +207,7 @@ public class HistorizedLookupsWithRangeQueriesTest {
   private void pipeToLookupOutOfOrder() {
     lookupTopic.pipeInput(key1V3, "key1V3");
     lookupTopic.pipeInput(key1V1, "key1V1");
-    lookupTopic.pipeInput(key2V2, "key2V4");
+    lookupTopic.pipeInput(key2V2, "key2V2");
     lookupTopic.pipeInput(key2V1, "key2V1");
     lookupTopic.pipeInput(key1V2, "key1V2");
     lookupTopic.pipeInput(key1V4, "key1V4");
