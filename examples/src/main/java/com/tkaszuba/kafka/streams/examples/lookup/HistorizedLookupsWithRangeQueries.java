@@ -30,9 +30,9 @@ import org.apache.kafka.streams.state.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class VersionedLookupWithRangeQueries {
+public class HistorizedLookupsWithRangeQueries {
   private static final Logger logger =
-      LoggerFactory.getLogger(VersionedLookupWithRangeQueries.class);
+      LoggerFactory.getLogger(HistorizedLookupsWithRangeQueries.class);
 
   public static final String NotFound = "VERSION NOT FOUND";
 

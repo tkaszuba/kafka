@@ -14,14 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tkaszuba.kafka.processors;
+package com.tkaszuba.kafka.examples.lookup;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.tkaszuba.kafka.serdes.ComparableKeyValueSerde;
 import com.tkaszuba.kafka.serdes.KeyValueSerde;
 import com.tkaszuba.kafka.streams.ComparableKeyValue;
-import com.tkaszuba.kafka.streams.examples.lookup.VersionedLookupWithRangeQueries;
+import com.tkaszuba.kafka.streams.examples.lookup.HistorizedLookupsWithRangeQueries;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -34,7 +34,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class VersionedLookupWithRangeQueriesTest {
+public class HistorizedLookupsWithRangeQueriesTest {
 
   private TopologyTestDriver testDriver;
   private TestInputTopic<String, ComparableKeyValue<String, Long>> inputTopic;
@@ -65,7 +65,7 @@ public class VersionedLookupWithRangeQueriesTest {
   @BeforeEach
   public void setup() {
     final StreamsBuilder builder = new StreamsBuilder();
-    VersionedLookupWithRangeQueries.createStream(builder);
+    HistorizedLookupsWithRangeQueries.createStream(builder);
 
     final Properties props = new Properties();
     props.setProperty(
@@ -76,25 +76,25 @@ public class VersionedLookupWithRangeQueriesTest {
     testDriver = new TopologyTestDriver(builder.build(), props);
     inputTopic =
         testDriver.createInputTopic(
-            VersionedLookupWithRangeQueries.InputTopic,
+            HistorizedLookupsWithRangeQueries.InputTopic,
             stringSerde.serializer(),
             keyValueSerde.serializer());
 
     lookupTopic =
         testDriver.createInputTopic(
-            VersionedLookupWithRangeQueries.LookupTopic,
+            HistorizedLookupsWithRangeQueries.LookupTopic,
             keyValueSerde.serializer(),
             stringSerde.serializer());
 
     queryCommandTopic =
         testDriver.createInputTopic(
-            VersionedLookupWithRangeQueries.QueryCommandTopic,
+            HistorizedLookupsWithRangeQueries.QueryCommandTopic,
             stringSerde.serializer(),
             keyValueSerde.serializer());
 
     queryResponseTopic =
         testDriver.createOutputTopic(
-            VersionedLookupWithRangeQueries.QueryResponseTopic,
+            HistorizedLookupsWithRangeQueries.QueryResponseTopic,
             stringSerde.deserializer(),
             stringSerde.deserializer());
   }
@@ -109,7 +109,7 @@ public class VersionedLookupWithRangeQueriesTest {
     pipeToLookupOutOfOrder();
 
     KeyValueStore<ComparableKeyValue<String, Long>, String> store =
-        testDriver.getKeyValueStore(VersionedLookupWithRangeQueries.VersionedLookupStoreName);
+        testDriver.getKeyValueStore(HistorizedLookupsWithRangeQueries.VersionedLookupStoreName);
 
     assertEquals(8, store.approximateNumEntries());
 
