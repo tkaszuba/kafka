@@ -18,6 +18,7 @@ package com.tkaszuba.kafka.streams.examples.lookup;
 
 import com.tkaszuba.kafka.serdes.KeyValueSerde;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Optional;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -26,6 +27,10 @@ import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.processor.api.*;
+import org.apache.kafka.streams.query.MultiVersionedKeyQuery;
+import org.apache.kafka.streams.query.PositionBound;
+import org.apache.kafka.streams.query.QueryConfig;
+import org.apache.kafka.streams.query.QueryResult;
 import org.apache.kafka.streams.state.*;
 import org.apache.kafka.streams.state.internals.VersionedKeyValueStoreBuilder;
 import org.slf4j.Logger;
@@ -106,8 +111,22 @@ public class HistorizedLookupsWithVersionedStores {
     public void process(Record<String, KeyValue<String, Long>> record) {
       Optional<String> lookup =
           Optional.ofNullable(lookupStore.get(record.value().key, record.value().value))
+              .or(() -> beforeValue(record.value().key))
               .map(VersionedRecord::value);
       context().forward(new Record<>(record.key(), lookup, context().currentStreamTimeMs()));
+    }
+
+    private Optional<VersionedRecord<String>> beforeValue(String key) {
+      QueryResult<VersionedRecordIterator<String>> result =
+          lookupStore.query(
+              MultiVersionedKeyQuery.<String, String>withKey(key)
+                  .fromTime(Instant.ofEpochMilli(0L))
+                  .withAscendingTimestamps(),
+              PositionBound.unbounded(),
+              new QueryConfig(false));
+      try (VersionedRecordIterator<String> iterator = result.getResult()) {
+        return iterator.hasNext() ? Optional.ofNullable(iterator.next()) : Optional.empty();
+      }
     }
   }
 }
