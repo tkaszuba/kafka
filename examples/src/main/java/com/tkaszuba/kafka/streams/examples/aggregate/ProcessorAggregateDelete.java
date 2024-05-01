@@ -33,6 +33,7 @@ public final class ProcessorAggregateDelete {
   public static final String Incoming = "input-topic";
   public static final String Outgoing = "output-topic";
   public static final String AggStoreName = "agg-store";
+  public static final int DeleteEvent = Integer.MIN_VALUE;
   private static final Serde<String> stringSerde = Serdes.String();
   private static final Serde<Integer> integerSerde = Serdes.Integer();
 
@@ -41,7 +42,7 @@ public final class ProcessorAggregateDelete {
         .groupByKey()
         .aggregate(
             () -> 0,
-            (k, v, agg) -> (v == Integer.MIN_VALUE) ? v : agg + v,
+            (k, v, agg) -> (v == DeleteEvent) ? DeleteEvent : agg + v,
             Materialized.<String, Integer, KeyValueStore<Bytes, byte[]>>as(AggStoreName)
                 .withCachingDisabled())
         .toStream()
@@ -62,7 +63,7 @@ public final class ProcessorAggregateDelete {
 
     @Override
     public void process(FixedKeyRecord<String, Integer> record) {
-      if (record.value() == Integer.MIN_VALUE) dslStore.delete(record.key());
+      if (record.value() == DeleteEvent) dslStore.delete(record.key());
       else context().forward(record);
     }
   }

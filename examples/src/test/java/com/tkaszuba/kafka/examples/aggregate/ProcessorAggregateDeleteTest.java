@@ -50,10 +50,10 @@ public class ProcessorAggregateDeleteTest {
     testDriver = new TopologyTestDriver(builder.build(), props);
     inputTopic =
         testDriver.createInputTopic(
-                ProcessorAggregateDelete.Incoming, stringSerde.serializer(), integerSerde.serializer());
+            ProcessorAggregateDelete.Incoming, stringSerde.serializer(), integerSerde.serializer());
     outputTopic =
         testDriver.createOutputTopic(
-                ProcessorAggregateDelete.Outgoing,
+            ProcessorAggregateDelete.Outgoing,
             stringSerde.deserializer(),
             integerSerde.deserializer());
   }
@@ -73,7 +73,7 @@ public class ProcessorAggregateDeleteTest {
     inputTopic.pipeInput(key, 1);
 
     inputTopic.pipeInput(key, null);
-    inputTopic.pipeInput(key, Integer.MIN_VALUE);
+    inputTopic.pipeInput(key, ProcessorAggregateDelete.DeleteEvent);
 
     inputTopic.pipeInput(key, 1);
     inputTopic.pipeInput(key, 1);

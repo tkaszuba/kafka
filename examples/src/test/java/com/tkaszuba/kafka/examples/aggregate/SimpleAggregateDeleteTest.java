@@ -73,7 +73,7 @@ public class SimpleAggregateDeleteTest {
     inputTopic.pipeInput(key, 1);
 
     inputTopic.pipeInput(key, null);
-    inputTopic.pipeInput(key, Integer.MIN_VALUE);
+    inputTopic.pipeInput(key, SimpleAggregateDelete.DeleteEvent);
 
     inputTopic.pipeInput(key, 1);
     inputTopic.pipeInput(key, 1);
