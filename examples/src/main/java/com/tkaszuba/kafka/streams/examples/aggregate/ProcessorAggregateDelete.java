@@ -21,9 +21,7 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.*;
-import org.apache.kafka.streams.processor.api.ContextualProcessor;
-import org.apache.kafka.streams.processor.api.ProcessorContext;
-import org.apache.kafka.streams.processor.api.Record;
+import org.apache.kafka.streams.processor.api.*;
 import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.TimestampedKeyValueStore;
 import org.slf4j.Logger;
@@ -47,23 +45,23 @@ public final class ProcessorAggregateDelete {
             Materialized.<String, Integer, KeyValueStore<Bytes, byte[]>>as(AggStoreName)
                 .withCachingDisabled())
         .toStream()
-        .process(StorePurgeProcessor::new, AggStoreName)
+        .processValues(StorePurgeProcessor::new, AggStoreName)
         .to(Outgoing);
   }
 
   private static class StorePurgeProcessor
-      extends ContextualProcessor<String, Integer, String, Integer> {
+      extends ContextualFixedKeyProcessor<String, Integer, Integer> {
 
     private TimestampedKeyValueStore<String, Integer> dslStore;
 
     @Override
-    public void init(ProcessorContext<String, Integer> context) {
+    public void init(FixedKeyProcessorContext<String, Integer> context) {
       super.init(context);
       this.dslStore = context.getStateStore(AggStoreName);
     }
 
     @Override
-    public void process(Record<String, Integer> record) {
+    public void process(FixedKeyRecord<String, Integer> record) {
       if (record.value() == Integer.MIN_VALUE) dslStore.delete(record.key());
       else context().forward(record);
     }
